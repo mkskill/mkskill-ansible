@@ -1,0 +1,19 @@
+" /etc/vim/vimrc.local
+set nohls nobackup sw=4 ts=4 ic
+set noml   " for security, not usability
+
+if has("autocmd")
+  filetype plugin indent on
+  autocmd Filetype python setlocal sts=4 et
+  autocmd Filetype html setlocal ts=2 sw=2 sts=2 et
+  autocmd Filetype htmldjango setlocal ts=2 sw=2 sts=2 et
+  autocmd Filetype rst setlocal ts=3 sw=3 sts=3 et
+  autocmd Filetype yaml setlocal ts=2 sw=2 sts=2 et syntax=
+endif
+
+if &diff
+  " highlighted syntax clashes with vimdiff highlighting
+  syntax off
+else
+  syntax on
+endif

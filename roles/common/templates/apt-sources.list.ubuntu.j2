@@ -1,0 +1,9 @@
+deb http://{{ country }}.archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }} main {{ repo_extra|default("") }}
+deb-src http://{{ country }}.archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }} main {{ repo_extra|default("") }}
+deb http://{{ country }}.archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }}-updates main {{ repo_extra|default("") }}
+deb-src http://{{ country }}.archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }}-updates main {{ repo_extra|default("") }}
+{% if repo_backports is defined and repo_backports %}deb http://{{ country }}.archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }}-backports main {{ repo_extra|default("") }}
+deb-src http://{{ country }}.archive.ubuntu.com/ubuntu/ {{ ansible_distribution_release }}-backports main {{ repo_extra|default("") }}{% endif %}
+deb http://security.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main {{ repo_extra|default("") }}
+deb-src http://security.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main {{ repo_extra|default("") }}
+{{ repo_custom|default("") }}

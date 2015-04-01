@@ -1,0 +1,16 @@
+---
+- name: glusterfs repo key
+  copy: src=files/gluster-repo.gpg dest=/etc/apt/trusted.gpg.d/gluster-repo.gpg
+    mode=0644 owner=root group=root
+
+- name: glusterfs repo sources
+  copy: src=files/gluster.list dest=/etc/apt/sources.list.d/gluster.list
+    mode=0644 owner=root group=root
+
+- name: apt update
+  apt: update_cache=yes
+
+- name: install packages
+  apt: name={{ item }} state=present
+  with_items:
+    - glusterfs-server

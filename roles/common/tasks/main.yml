@@ -1,0 +1,85 @@
+---
+- name: Check distribution
+  assert: that="ansible_distribution == 'Ubuntu'"
+
+- name: Hostname
+  hostname: name={{ inventory_hostname_short }}
+
+- name: Hosts file IPv4
+  lineinfile: dest=/etc/hosts regexp="^{{ public_ip|replace('.', '\\.') }}\\s"
+    line="{{ public_ip }} {{ inventory_hostname }} {{ inventory_hostname_short }}"
+  when: public_ip is defined
+
+- name: Hosts file IPv6
+  lineinfile: dest=/etc/hosts regexp="^{{ public_ip6 }}\\s"
+      line="{{ public_ip6 }} {{ inventory_hostname }} {{ inventory_hostname_short }}"
+  when: public_ip6 is defined
+
+- name: Proxy environment
+  lineinfile: dest=/etc/environment regexp="^{{ item.regexp }}"
+      line="{{ item.line }}"
+  with_items:
+    - regexp: http_proxy
+      line: "http_proxy=http://mksrvrouter1.mkskill:8118"
+    - regexp: https_proxy
+      line: "https_proxy=http://mksrvrouter1.mkskill:8118"
+    - regexp: no_proxy
+      line: "no_proxy=localhost,.mkskill"
+
+- name: APT sources
+  template: src=apt-sources.list.ubuntu.j2 dest=/etc/apt/sources.list owner=root group=root mode=0644
+  when: ansible_distribution == 'Ubuntu'
+
+- name: APT update
+  apt: update_cache=yes
+
+- name: Installed packages
+  apt: name={{ item }} state=present
+  with_items:
+    - vim
+    - netcat-openbsd
+    - tmux
+
+- name: Clean out packages
+  apt: name={{ item }} state=absent purge=yes
+  with_items:
+    - netcat-traditional
+
+- name: Default editor
+  alternatives: name=editor path=/usr/bin/vim.basic
+
+- name: User account
+  user: name=mkskill groups=sudo append=yes update_password=on_create shell=/bin/bash
+
+- name: SSH keys for user
+  authorized_key: user=mkskill key="{{ lookup('file', 'public_keys/'+item+'.pub') }}"
+  with_items:
+    - mkskill
+    - beli
+
+- name: Ansible account
+  user: name=ansible groups=sudo append=yes update_password=on_create shell=/bin/bash
+
+- name: SSH keys for ansible
+  authorized_key: user=ansible key="{{ lookup('file', 'public_keys/'+item+'.pub') }}"
+  with_items:
+    - mkskill
+    - beli
+
+- name: Ansible in sudoers
+  lineinfile: dest=/etc/sudoers state=present regexp='^ansible ' line='ansible ALL=(root) NOPASSWD:ALL' validate='visudo -cf %s'
+
+- name: Sudoers for proxy
+  lineinfile: dest=/etc/sudoers state=present regexp='^Defaults\s*env_keep' line='Defaults\tenv_keep="http_proxy https_proxy no_proxy"' validate='visudo -cf %s'
+
+- name: SSH deny root login
+  lineinfile: dest=/etc/ssh/sshd_config state=present regexp='^PermitRootLogin ' line='PermitRootLogin without-password'
+  notify:
+    - restart ssh
+
+- name: xzcopy
+  lineinfile: dest=/etc/bash.bashrc line="{{ item }}"
+  with_items:
+    - "alias xzcopy='( xz -6 -e -c | base64 -w0 ; echo  )'"
+    - "alias xzpaste='( base64 -id | unxz -c )'"
+
