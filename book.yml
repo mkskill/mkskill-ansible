@@ -1,18 +1,21 @@
 ---
 - hosts: group1
   sudo: yes
-  user: ansible
+  vars:
+    - ssh_permit_root: "yes"
+    - ssh_keys:
+      - mkskill
+      - beli
+      - beli@cgrx9
   roles:
     - role: common
 
 - hosts: group1:&hypervisors
   sudo: yes
-  user: ansible
   roles:
     - role: kvm
 
 - hosts: group1:&storage
   sudo: yes
-  user: ansible
   roles:
     - role: glusterfs
