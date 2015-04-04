@@ -9,3 +9,4 @@ mks02
 [group1]
 mks01 public_ip6=fdaf:90a8:fb33:2::1:1 country=sk
 mks02 public_ip6=fdaf:90a8:fb33:2::1:2 country=sk
+
